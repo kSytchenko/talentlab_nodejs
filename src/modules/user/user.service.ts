@@ -13,11 +13,19 @@ export class UserService {
   }
 
   async findById(id: number) {
-    return User.findByPk(id);
+    try {
+      return await User.findByPk(id);
+    } catch (error) {
+      throw new GeneralException('Something went wrong', 500);
+    }
   }
 
   async findOne(username: string, password: string) {
-    return User.findOne({ where: { username, password } });
+    try {
+      return await User.findOne({ where: { username, password } });
+    } catch (error) {
+      throw new GeneralException('Something went wrong', 500);
+    }
   }
 
   async create(username: string, password: string, roles: Role[] = [Role.User]) {
@@ -45,13 +53,29 @@ export class UserService {
     }
   }
 
+  async delete(id: string) {
+    try {
+      return await User.destroy({
+        where: {
+          id,
+        },
+      });
+    } catch (error) {
+      throw new GeneralException('Something went wrong', 500);
+    }
+  }
+
   async getUserRoles(userId: string) {
-    return this.dbService.getConnection().query(
-      'SELECT role_id FROM user_to_role WHERE user_id = :userId',
-      {
-        replacements: { userId },
-        type: QueryTypes.SELECT,
-      },
-    );
+    try {
+      return await this.dbService.getConnection().query(
+        'SELECT role_id FROM user_to_role WHERE user_id = :userId',
+        {
+          replacements: { userId },
+          type: QueryTypes.SELECT,
+        },
+      );
+    } catch (error) {
+      throw new GeneralException('Something went wrong', 500);
+    }
   }
 }

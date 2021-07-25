@@ -1,9 +1,9 @@
-import { Controller, Get, Post, UseGuards, Request, Body } from '@nestjs/common';
+import { Controller, Get, Post, UseGuards, Request, Body, Delete, Param } from '@nestjs/common';
 
 import { Role } from '../../enums/role';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UserService } from './user.service';
-import { Auth } from '../../guards/auth.guard';
+import { Auth } from '../auth/guards/auth.guard';
 import { UserData } from './interfaces';
 import { GeneralException } from '../../exceptions/general.exception';
 
@@ -29,14 +29,22 @@ export class UserController {
     return 'You\'re logged in as User';
   }
 
-  // @Auth(Role.Admin)
+  @Auth(Role.Admin)
   @Post('users')
   async createUser(@Body() userData: UserData) {
-    console.log('Create userData', userData)
     if (!userData.username || !userData.password) {
       throw new GeneralException('All or one of the required parameters is missing.', 400);
     }
 
     return this.userService.create(userData.username, userData.password, JSON.parse(userData.roles));
+  }
+
+  @Auth(Role.Admin)
+  @Delete('users/:id')
+  async deleteUser(@Param('id') id: string) {
+    if (!id) {
+      throw new GeneralException('"id" parameter cannot be empty', 400);
+    }
+    return this.userService.delete(id);
   }
 }
