@@ -44,4 +44,14 @@ export class UserService {
       throw new GeneralException('Something went wrong', 500);
     }
   }
+
+  async getUserRoles(userId: string) {
+    return this.dbService.getConnection().query(
+      'SELECT role_id FROM user_to_role WHERE user_id = :userId',
+      {
+        replacements: { userId },
+        type: QueryTypes.SELECT,
+      },
+    );
+  }
 }
